@@ -7,6 +7,9 @@ public class modelBook {
     String author;
     String categores;
     int quantity;
+    private String dueDate;
+    private String borrowedDate;
+
 
     public modelBook(int id, String title, String author, String categories, int quantity){
         this.id = id;
@@ -23,13 +26,27 @@ public class modelBook {
     public int getQuantity(){return quantity;}
     public boolean isAvailable(){return quantity > 0;}
     public void setAvailable(boolean available){
-        if(available){
-            quantity++;
-        } else {
-            quantity--;
+        this.setAvailable(available);
+    }
+    
+        public String getBorrowedDate() {
+            return borrowedDate;
+        }
+
+        public void setBorrowedDate(String borrowedDate) {
+            this.borrowedDate = borrowedDate;
+        }
+
+        public String getDueDate() {
+            return dueDate;
+        }
+
+        public void setDueDate(String dueDate) {
+            this.dueDate = dueDate;
         }
     }
 
-    
-}
+
+   
+
 
