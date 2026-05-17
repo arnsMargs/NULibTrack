@@ -1,6 +1,6 @@
 package main;
 
-import ui.LoginUI;
+import LoginUi.*;
 
 public class LibApp {
     public static void main(String [] args){
