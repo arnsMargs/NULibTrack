@@ -21,6 +21,14 @@ public class modelBook {
     public String getAuthor(){return author;}
     public String getCategories(){return categores;}
     public int getQuantity(){return quantity;}
+    public boolean isAvailable(){return quantity > 0;}
+    public void setAvailable(boolean available){
+        if(available){
+            quantity++;
+        } else {
+            quantity--;
+        }
+    }
 
     
 }
