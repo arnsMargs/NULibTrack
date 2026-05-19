@@ -1,19 +1,20 @@
 package Services;
 
 import java.util.*;
-
-import LibTrackModel.modelBook;
-import LibTrackModel.modelU;
+import LibTrackModel.*;
 
 public class dB {
-    
+
     public static List<modelU> users = new ArrayList<>();
     public static List<modelBook> books = new ArrayList<>();
 
-    static{
-        books.add(new modelBook(1,"Modern Java in Action", "Raoul-Gabriel Urma", "Programming", 5));
-        books.add(new modelBook(2,"Clean Code", "Robert C. Martin", "Programming", 3));
-        books.add(new modelBook(3,"The Pragmatic Programmer", "Andrew Hunt", "Programming", 4));
-        books.add(new modelBook(4,"Design Patterns", "Erich Gamma", "Programming", 2));
+    static {
+
+        users.add(new modelLib("lib@nu.com", "1234", "Librarian"));
+        users.add(new modelPat("pat@nu.com", "1234", "Patron"));
+
+        books.add(new modelBook(1, "Clean Code", "Robert Martin", "Programming", 3));
+        books.add(new modelBook(2, "Java Basics", "Oracle", "Programming", 5));
+        books.add(new modelBook(3, "Design Patterns", "GoF", "Software", 2));
     }
 }
