@@ -1,57 +1,33 @@
 package PatronsPanel;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import LibTrackModel.modelBook;
-import Services.dB;
 import java.awt.*;
+import Services.dB;
 
-public class CatalogPanel extends JPanel {
+import LibTrackModel.modelBook;
 
-    JTable table;
-    DefaultTableModel model;
+public class CatalogPanel{
+    private JPanel createCatalogPanel() {
 
-    public CatalogPanel(){
+    JPanel p = new JPanel(new BorderLayout());
+    p.setBorder(BorderFactory.createTitledBorder("Catalog"));
 
-        setLayout(new BorderLayout());
+    String[] cols = {"Title","Author","Status"};
+    Object[][] data = new Object[dB.books.size()][3];
 
-        // 🔍 SEARCH FIELD
-        JTextField search = new JTextField();
-        search.setBorder(BorderFactory.createTitledBorder("Search Books"));
-
-        // 🧾 TABLE
-        String[] columns = {"ID", "Title", "Status"};
-        model = new DefaultTableModel(columns, 0);
-
-        table = new JTable(model);
-
-        loadTable("");
-
-        search.addKeyListener(new java.awt.event.KeyAdapter(){
-            public void keyReleased(java.awt.event.KeyEvent e){
-                loadTable(search.getText());
-            }
-        });
-
-        add(search, BorderLayout.NORTH);
-        add(new JScrollPane(table), BorderLayout.CENTER);
+    int i = 0;
+    for(modelBook b : dB.books){
+        data[i][0] = b.getTitle();
+        data[i][1] = "Author"; // placeholder
+        data[i][2] = b.isAvailable() ? "Available" : "Borrowed";
+        i++;
     }
 
-    // ✅ LOAD TABLE
-    void loadTable(String keyword){
+    JTable table = new JTable(data, cols);
 
-        model.setRowCount(0);
-
-        for(modelBook b : dB.books){
-
-            if(b.getTitle().toLowerCase().contains(keyword.toLowerCase())){
-
-                model.addRow(new Object[]{
-                    b.getId(),
-                    b.getTitle(),
-                    b.isAvailable() ? "Available" : "Unavailable"
-                });
-            }
-        }
-    }
+    p.add(new JScrollPane(table));
+    return p;
 }
+
+}
+

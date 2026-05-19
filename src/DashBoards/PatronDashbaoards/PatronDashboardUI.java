@@ -1,194 +1,327 @@
 package DashBoards.PatronDashbaoards;
 
-import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.*;
 
 public class PatronDashboardUI extends JFrame {
-    Color navy = new Color(0, 51, 102);
-    Color yellow = new Color(255, 204, 0);
-    Color bg = new Color(240, 240, 240);
+
+    Color navy = new Color(20, 40, 80);
+    Color yellow = new Color(255, 200, 0);
+    Color bg = new Color(245, 245, 255);
+
+    List<Book> books = new ArrayList<>();
+    List<String> borrowedBooks = new ArrayList<>();
+    List<String> reservedBooks = new ArrayList<>();
+    List<History> historyList = new ArrayList<>();
+
+    int booksRead = 0;
+    int fineAmount = 150;
+
+    DefaultListModel<String> listModel = new DefaultListModel<>();
+    JList<String> resultsList = new JList<>(listModel);
+
+    JTextField searchField;
+    JPanel borrowedPanel, reservePanel, historyPanel;
+    JLabel feeLabel;
+
+    // ================= BOOK =================
+    class Book {
+        int id, quantity;
+        String title, author, status;
+
+        Book(int id, String t, String a, int q, String s) {
+            this.id = id;
+            title = t;
+            author = a;
+            quantity = q;
+            status = s;
+        }
+    }
+
+    // ================= HISTORY =================
+    class History {
+        String title, author, borrowedDate, returnedDate;
+
+        History(String t, String a, String b, String r) {
+            title = t;
+            author = a;
+            borrowedDate = b;
+            returnedDate = r;
+        }
+    }
 
     public PatronDashboardUI() {
-        setTitle("NU LibTrack - Patron Dashboard");
-        setSize(1400, 800);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
 
-        // =========================
-        // TOP HEADER
-        // =========================
+        // SAMPLE DATA
+        books.add(new Book(101,"Java Programming","John Smith",5,"Available"));
+        books.add(new Book(102,"Digital Marketing","Anna Cruz",0,"Borrowed"));
+        books.add(new Book(103,"Basic Economics","Mark Lee",2,"Available"));
+
+        setTitle("NU LibTrack");
+        setSize(1300,800);
+        setLayout(new BorderLayout());
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+        // ================= HEADER =================
         JPanel top = new JPanel(new BorderLayout());
         top.setBackground(navy);
-        top.setPreferredSize(new Dimension(1400, 70));
 
         JLabel title = new JLabel("NU LibTrack");
         title.setForeground(Color.WHITE);
-        title.setFont(new Font("Arial", Font.BOLD, 32));
-        title.setBorder(new EmptyBorder(10, 20, 10, 10));
+        title.setFont(new Font("Arial",Font.BOLD,22));
+        title.setBorder(new EmptyBorder(10,20,10,10));
 
-        JLabel dash = new JLabel("Patron Dashboard");
-        dash.setForeground(Color.WHITE);
-        dash.setFont(new Font("Arial", Font.BOLD, 20));
+        JButton profile = new JButton("A");
+        profile.setPreferredSize(new Dimension(45,45));
+        profile.setBackground(new Color(102,153,255));
+        profile.setForeground(Color.WHITE);
 
-        JPanel centerTitle = new JPanel();
-        centerTitle.setBackground(navy);
-        centerTitle.add(dash);
+        profile.addActionListener(e -> showProfile());
 
-        top.add(title, BorderLayout.WEST);
-        top.add(centerTitle, BorderLayout.CENTER);
+        top.add(title,BorderLayout.WEST);
+        top.add(profile,BorderLayout.EAST);
 
-        JPanel yellowLine = new JPanel();
-        yellowLine.setBackground(yellow);
-        yellowLine.setPreferredSize(new Dimension(1400, 10));
+        add(top,BorderLayout.NORTH);
 
-        JPanel topContainer = new JPanel(new BorderLayout());
-        topContainer.add(top, BorderLayout.CENTER);
-        topContainer.add(yellowLine, BorderLayout.SOUTH);
-
-        add(topContainer, BorderLayout.NORTH);
-
-        // =========================
-        // SIDEBAR
-        // =========================
-        JPanel side = new JPanel();
-        side.setBackground(navy);
-        side.setPreferredSize(new Dimension(220, 0));
-        side.setLayout(new GridLayout(6, 1, 0, 5));
-
-        String[] menu = {
-                "Home",
-                "Catalog",
-                "My Account",
-                "Reservation",
-                "Fines",
-                "Notifications"
-        };
-
-        for(String s : menu){
-            JButton b = new JButton(s);
-            b.setFocusPainted(false);
-            b.setBackground(navy);
-            b.setForeground(Color.WHITE);
-            b.setFont(new Font("Arial", Font.BOLD, 18));
-            b.setBorder(BorderFactory.createLineBorder(Color.WHITE));
-            side.add(b);
-        }
-
-        add(side, BorderLayout.WEST);
-
-        // =========================
-        // MAIN CONTENT
-        // =========================
-        JPanel main = new JPanel();
+        // ================= MAIN =================
+        JPanel main = new JPanel(new BorderLayout());
         main.setBackground(bg);
-        main.setBorder(new EmptyBorder(15,15,15,15));
-        main.setLayout(new GridLayout(3,2,15,15));
 
-        // Online Catalog Search
-        JPanel catalog = createPanel("Online Catalog Search");
-        catalog.setLayout(new BorderLayout());
+        // ===== SEARCH PANEL =====
+        JPanel searchPanel = new JPanel(new BorderLayout());
+        searchPanel.setBorder(BorderFactory.createTitledBorder("Catalog"));
 
-        JPanel searchBar = new JPanel(new GridLayout(1,4,10,0));
-        searchBar.add(new JComboBox<>(new String[]{"All Categories"}));
-        searchBar.add(new JComboBox<>(new String[]{"All Formats"}));
-        searchBar.add(new JTextField("Enter book title..."));
+        searchField = new JTextField();
         JButton searchBtn = new JButton("Search");
         searchBtn.setBackground(yellow);
-        searchBar.add(searchBtn);
 
-        JPanel filters = new JPanel(new GridLayout(1,4,10,0));
-        for(String f : new String[]{"Genre","Author","Publication Year","Availability"}){
-            JButton btn = createButton(f);
-            filters.add(btn);
-        }
+        JPanel bar = new JPanel(new GridLayout(1,2,10,10));
+        bar.add(searchField);
+        bar.add(searchBtn);
 
-        catalog.add(searchBar, BorderLayout.NORTH);
-        catalog.add(filters, BorderLayout.SOUTH);
+        searchPanel.add(bar,BorderLayout.NORTH);
+        searchPanel.add(new JScrollPane(resultsList),BorderLayout.CENTER);
 
-        // Recommendations
-        JPanel recs = createPanel("Recommendations");
-        recs.add(new JLabel("No Available Data"));
+        searchBtn.addActionListener(e -> performSearch());
 
-        // Real-Time Availability
-        JPanel avail = createPanel("Real-Time Availability");
-        avail.setLayout(new GridLayout(1,4,10,10));
-        avail.add(makeStatus("Available", new Color(0,153,0)));
-        avail.add(makeStatus("Borrowed", new Color(0,102,204)));
-        avail.add(makeStatus("Reserved", new Color(255,102,0)));
-        avail.add(makeStatus("On Hold", new Color(204,0,0)));
+        resultsList.addMouseListener(new MouseAdapter(){
+            public void mouseClicked(MouseEvent e){
+                handleBookClick();
+            }
+        });
 
-        // My Borrowed Books
-        JPanel borrowed = createPanel("My Borrowed Books");
-        borrowed.setLayout(new GridLayout(2,2,10,10));
-        borrowed.add(new JLabel("Intro to Object-Oriented Programming"));
-        JButton renew = new JButton("Renew");
-        renew.setBackground(yellow);
-        borrowed.add(renew);
-        borrowed.add(new JLabel("Digital Marketing"));
-        JButton ret = createButton("Return");
-        borrowed.add(ret);
+        // ===== RIGHT PANEL (FIXED EQUAL BOXES) =====
+        JPanel right = new JPanel(new GridLayout(4,1,15,15));
+        right.setBorder(new EmptyBorder(10,10,10,10));
 
-        // My Reservations
-        JPanel reserve = createPanel("My Reservations");
-        reserve.setLayout(new BorderLayout());
-        reserve.add(new JLabel("Modern Java"), BorderLayout.CENTER);
-        JButton cancel = new JButton("Cancel");
-        cancel.setBackground(new Color(204,0,0));
-        cancel.setForeground(Color.WHITE);
-        reserve.add(cancel, BorderLayout.SOUTH);
+        borrowedPanel = createBox("Borrowed");
+        reservePanel = createBox("Reservations");
+        historyPanel = createBox("History");
+        JPanel fines = createBox("Fines");
 
-        // Reading History
-        JPanel history = createPanel("Reading History");
-        history.setLayout(new GridLayout(3,1));
-        history.add(new JLabel("Modern Java – Borrowed: Mar 8, 2026; Returned: Mar 12, 2026"));
-        history.add(new JLabel("Leadership 101 – Borrowed: Apr 1, 2026; Returned: Apr 9, 2026"));
-        history.add(new JLabel("Basic Economics – Borrowed: Apr 1, 2026; Returned: Apr 9, 2026"));
+        // ===== FINES =====
+        fines.setLayout(new FlowLayout(FlowLayout.LEFT));
 
-        // Fines & Penalties
-        JPanel fines = createPanel("Fines & Penalties");
-        JButton payBtn = new JButton("Pay Fines");
-        payBtn.setBackground(yellow);
-        fines.add(payBtn);
+        feeLabel = new JLabel("₱" + fineAmount);
+        JButton pay = new JButton("Pay");
+        pay.setBackground(yellow);
 
-        // Add all panels
-        main.add(catalog);
-        main.add(recs);
-        main.add(avail);
-        main.add(borrowed);
-        main.add(reserve);
-        main.add(history);
-        main.add(fines);
+        pay.addActionListener(e -> {
+            fineAmount = 0;
+            feeLabel.setText("₱0");
+            JOptionPane.showMessageDialog(this,"Payment successful ✅");
+        });
 
-        add(main, BorderLayout.CENTER);
+        fines.add(feeLabel);
+        fines.add(pay);
+
+        // ADD PANELS (EQUAL SIZE)
+        right.add(borrowedPanel);
+        right.add(reservePanel);
+        right.add(historyPanel);
+        right.add(fines);
+
+        main.add(searchPanel,BorderLayout.CENTER);
+        main.add(right,BorderLayout.EAST);
+
+        add(main);
 
         setVisible(true);
     }
 
-    private JPanel createPanel(String title){
+    // ✅ CREATE EQUAL BOX
+    private JPanel createBox(String title){
         JPanel panel = new JPanel();
-        panel.setBackground(Color.WHITE);
+        panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
         panel.setBorder(BorderFactory.createTitledBorder(title));
-        panel.setLayout(new FlowLayout());
+        panel.setBackground(Color.WHITE);
+
+        panel.setPreferredSize(new Dimension(250,150));
+        panel.setMinimumSize(new Dimension(250,150));
+
         return panel;
     }
 
-    private JButton createButton(String text){
-        JButton b = new JButton(text);
-        b.setBackground(navy);
-        b.setForeground(Color.WHITE);
-        b.setFocusPainted(false);
-        b.setFont(new Font("Arial", Font.BOLD, 16));
-        return b;
+    // ================= SEARCH =================
+    private void performSearch(){
+        listModel.clear();
+
+        String key = searchField.getText().toLowerCase();
+
+        for(Book b: books){
+            if(b.title.toLowerCase().contains(key)){
+                listModel.addElement(
+                        "ID:"+b.id+" | "+b.title+
+                                " | "+b.author+
+                                " | Qty:"+b.quantity+
+                                " | "+b.status);
+            }
+        }
     }
 
-    private JLabel makeStatus(String text, Color bg){
-        JLabel l = new JLabel(text, SwingConstants.CENTER);
-        l.setOpaque(true);
-        l.setBackground(bg);
-        l.setForeground(Color.WHITE);
-        l.setFont(new Font("Arial", Font.BOLD, 16));
-        return l;
+    // ================= CLICK =================
+    private void handleBookClick(){
+
+        String selected = resultsList.getSelectedValue();
+
+        for(Book b: books){
+
+            if(selected.contains("ID:"+b.id)){
+
+                if(b.quantity > 0){
+                    b.quantity--;
+                    borrowedBooks.add(b.title);
+                    JOptionPane.showMessageDialog(this,"Borrowed ✅");
+
+                } else {
+                    reservedBooks.add(b.title);
+                    JOptionPane.showMessageDialog(this,"Reserved ✅");
+                }
+            }
+        }
+
+        refreshBorrowed();
+        refreshReserve();
+        performSearch();
+    }
+
+    // ================= BORROW =================
+    private void refreshBorrowed(){
+
+        borrowedPanel.removeAll();
+
+        for(String book: borrowedBooks){
+
+            JPanel row = new JPanel();
+
+            JLabel lbl = new JLabel(book);
+
+            JButton renew = new JButton("Renew");
+            JButton ret = new JButton("Return");
+
+            renew.addActionListener(e ->
+                    JOptionPane.showMessageDialog(this,
+                            book+" renewed for 3 more days ✅"));
+
+            ret.addActionListener(e -> {
+
+                borrowedBooks.remove(book);
+
+                for(Book b: books){
+                    if(b.title.equals(book)){
+                        b.quantity++;
+
+                        historyList.add(new History(
+                                b.title,b.author,
+                                LocalDate.now().minusDays(3).toString(),
+                                LocalDate.now().toString()
+                        ));
+
+                        booksRead++;
+                    }
+                }
+
+                refreshBorrowed();
+                refreshHistory();
+                performSearch();
+            });
+
+            row.add(lbl);
+            row.add(renew);
+            row.add(ret);
+
+            borrowedPanel.add(row);
+        }
+
+        borrowedPanel.revalidate();
+        borrowedPanel.repaint();
+    }
+
+    // ================= RESERVE =================
+    private void refreshReserve(){
+
+        reservePanel.removeAll();
+
+        for(String book: reservedBooks){
+
+            JPanel row = new JPanel();
+
+            JLabel lbl = new JLabel(book);
+            JButton cancel = new JButton("Cancel");
+
+            cancel.addActionListener(e -> {
+                reservedBooks.remove(book);
+                refreshReserve();
+            });
+
+            row.add(lbl);
+            row.add(cancel);
+
+            reservePanel.add(row);
+        }
+
+        reservePanel.revalidate();
+        reservePanel.repaint();
+    }
+
+    // ================= HISTORY =================
+    private void refreshHistory(){
+
+        historyPanel.removeAll();
+
+        for(History h: historyList){
+
+            JPanel card = new JPanel();
+            card.setLayout(new BoxLayout(card,BoxLayout.Y_AXIS));
+            card.setBackground(new Color(235,240,255));
+
+            card.add(new JLabel("📘 " + h.title));
+            card.add(new JLabel("Author: " + h.author));
+            card.add(new JLabel("Borrowed: "+h.borrowedDate+
+                    " | Returned: "+h.returnedDate));
+
+            historyPanel.add(card);
+        }
+
+        historyPanel.revalidate();
+        historyPanel.repaint();
+    }
+
+    // ================= PROFILE =================
+    private void showProfile(){
+
+        JOptionPane.showMessageDialog(this,
+                "Name: Arniel Margaret T.\n"+
+                        "Books Read: "+booksRead+
+                        "\nRole: Student");
+    }
+
+    public static void main(String[] args){
+        new PatronDashboardUI();
     }
 }

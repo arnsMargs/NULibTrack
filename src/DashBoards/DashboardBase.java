@@ -15,7 +15,8 @@ public abstract class DashboardBase extends JFrame {
         setLayout(new BorderLayout());
         setLocationRelativeTo(null);
 
-        content = new JPanel(null); // IMPORTANT (for animation)
+        // IMPORTANT for animation
+        content = new JPanel(null);
 
         add(createSidebar(), BorderLayout.WEST);
         add(content, BorderLayout.CENTER);
@@ -27,13 +28,14 @@ public abstract class DashboardBase extends JFrame {
 
     protected void switchPanel(JPanel panel) {
 
-        panel.setSize(content.getWidth(), content.getHeight());
+        panel.setBounds(0, 0, 900, 600);
 
         if (content.getComponentCount() == 0) {
             content.add(panel);
-            content.repaint();
         } else {
             PanelAnimator.slide(content, panel);
         }
+
+        content.repaint();
     }
 }
